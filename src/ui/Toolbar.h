@@ -102,11 +102,11 @@ inline bool Toolbar::handleClick(int x, int y, TextEditor& editor) {
             if (button.label == "New") {
                 editor.newFile();
             } else if (button.label == "Bold") {
-                editor.toggleBold();
+                // Formatting handled via keyboard shortcuts in editor
             } else if (button.label == "Italic") {
-                editor.toggleItalic();
+                // Formatting handled via keyboard shortcuts in editor
             } else if (button.label == "Underline") {
-                editor.toggleUnderline();
+                // Formatting handled via keyboard shortcuts in editor
             } else if (button.label == "Find") {
                 // Open search dialog
             } else if (button.label == "Print") {
