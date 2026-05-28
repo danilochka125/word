@@ -183,3 +183,101 @@ MIT License - See LICENSE file for details.
 3. Submit pull request
 
 All code must follow ASCII-only naming conventions for cross-platform compatibility.
+The file /workspace/README.md has been edited. Here's the result of running `cat -n` on a snippet of /workspace/README.md:
+     1	# LiteEdit - Lightweight Text Editor
+     2	
+     3	A high-performance, low-memory text editor optimized for low-end devices with support for multiple document formats (.txt, .docx, .rtf).
+     4	
+     5	## Latest Update (v1.1.0)
+     6	
+     7	### What's New
+     8	
+     9	This update significantly expands format support and typography options:
+    10	
+    11	#### 1. Enhanced Format Support
+    12	- **Full .docx Support**: Added `DocxHandler` module using pugixml and libzip for parsing and saving Microsoft Word documents
+    13	  - Preserves text formatting (bold, italic, underline)
+    14	  - Maintains font family and size information
+    15	  - Supports paragraph styles
+    16	  - Extracts content from document.xml and styles.xml within the OOXML package
+    17	  
+    18	- **Improved .rtf Support**: Enhanced `RtfHandler` module for Rich Text Format files
+    19	  - Better parsing of RTF control words
+    20	  - Support for nested formatting groups
+    21	  - Font table extraction and mapping
+    22	  - Color and background color support
+    23	
+    24	#### 2. Font Management System
+    25	- **New FontManager Module**: Centralized font handling with support for multiple font families
+    26	  - Arial (default sans-serif)
+    27	  - Times New Roman (default serif)
+    28	  - Courier New (monospace for code)
+    29	  - Verdana (alternative sans-serif)
+    30	  - Georgia (alternative serif)
+    31	  
+    32	- **Font Features**:
+    33	  - Runtime font switching via toolbar
+    34	  - Font size adjustment (8pt - 72pt)
+    35	  - Font caching for performance
+    36	  - Fallback mechanism for missing fonts
+    37	
+    38	#### 3. Updated Dependencies
+    39	- Added `libzip-dev` for .docx file manipulation (OOXML uses ZIP container)
+    40	- Added `zlib1g-dev` for compression/decompression
+    41	- Integrated `pugixml` (header-only, auto-downloaded via CMake) for XML parsing
+    42	
+    43	#### 4. Code Architecture Improvements
+    44	- Refactored `TextEditor` to support rich text elements with per-character formatting
+    45	- Enhanced `Document` model to store font attributes alongside text
+    46	- Updated `Toolbar` UI with font family dropdown and format buttons
+    47	- Added format detection based on file extension
+    48	
+    49	### Files Modified/Added
+    50	
+    51	**New Files:**
+    52	- `src/formats/DocxHandler.h` - DOCX file format handler interface
+    53	- `src/formats/DocxHandler.cpp` - DOCX parsing and saving implementation
+    54	- `src/formats/RtfHandler.h` - RTF file format handler interface
+    55	- `src/formats/RtfHandler.cpp` - RTF parsing and saving implementation
+    56	- `src/fonts/FontManager.h` - Font management system interface
+    57	- `src/fonts/FontManager.cpp` - Font loading and caching implementation
+    58	
+    59	**Modified Files:**
+    60	- `src/editor/TextEditor.h` - Extended to support rich text elements
+    61	- `src/editor/TextEditor.cpp` - Added formatting methods
+    62	- `src/ui/Toolbar.h` - Added font selection controls
+    63	- `src/ui/Toolbar.cpp` - Implemented font/format button handlers
+    64	- `src/core/Document.h` - Enhanced data model for formatting
+    65	- `CMakeLists.txt` - Added new dependencies and source files
+    66	- `README.md` - This file (updated documentation)
+    67	
+    68	### Build Requirements Updated
+    69	
+    70	New system packages required:
+    71	```bash
+    72	# Ubuntu/Debian
+    73	sudo apt-get install libzip-dev zlib1g-dev
+    74	
+    75	# Fedora/RHEL
+    76	sudo dnf install libzip-devel zlib-devel
+    77	
+    78	# macOS
+    79	brew install libzip
+    80	```
+    81	
+    82	### Known Limitations
+    83	
+    84	- .docx images and tables are not yet supported (text only)
+    85	- Advanced .docx features (track changes, comments) not implemented
+    86	- RTF support covers common formatting but not full specification
+    87	- Font rendering quality depends on SDL2_ttf backend
+    88	
+    89	---
+    90	
+    91	## Technology Stack Selection
+    92	
+    93	### Chosen: C++ with SDL2 and Dear ImGui
+    94	
+    95	**Rationale:**
+    96	
+Review the changes and make sure they are as expected. Edit the file again if necessary.
