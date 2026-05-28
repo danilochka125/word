@@ -1,4 +1,6 @@
 #include "utils/FileHandler.h"
+#include "formats/DocxHandler.h"
+#include "formats/RtfHandler.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -29,6 +31,10 @@ FileHandler::Format FileHandler::detectFormat(const std::string& path) {
         return Format::RichText;
     } else if (ext == ".docx") {
         return Format::WordDocument;
+    } else if (ext == ".doc") {
+        return Format::WordDocument;  // Legacy .doc treated as Word format
+    } else if (ext == ".odt") {
+        return Format::WordDocument;  // OpenDocument Text
     }
     
     return Format::PlainText;  // Default to plain text
@@ -71,101 +77,81 @@ bool FileHandler::savePlainText(const std::string& path, const std::string& cont
 }
 
 bool FileHandler::loadRTF(const std::string& path, std::string& content) {
-    // Basic RTF loading - strips RTF formatting
-    // In production, use proper RTF parser
+    // Use RtfHandler for full RTF support with formatting
+    RtfHandler handler;
+    RtfDocument doc;
     
-    std::string rtfContent;
-    if (!loadPlainText(path, rtfContent)) {
-        return false;
-    }
-    
-    // Simple RTF stripping (remove control words and braces)
-    std::string plainText;
-    bool inControlWord = false;
-    int braceDepth = 0;
-    
-    for (size_t i = 0; i < rtfContent.size(); ++i) {
-        char c = rtfContent[i];
-        
-        if (c == '{') {
-            braceDepth++;
-            inControlWord = false;
-        } else if (c == '}') {
-            braceDepth--;
-            inControlWord = false;
-        } else if (c == '\\' && !inControlWord) {
-            inControlWord = true;
-        } else if (inControlWord) {
-            if (c == ' ' || c == '\n' || c == '\r' || c == '\t') {
-                inControlWord = false;
+    if (handler.loadFromFile(path, doc)) {
+        // Extract plain text from all paragraphs
+        std::stringstream ss;
+        for (size_t i = 0; i < doc.paragraphs.size(); ++i) {
+            ss << doc.paragraphs[i].text;
+            if (i < doc.paragraphs.size() - 1) {
+                ss << "\n";
             }
-        } else if (braceDepth > 1) {
-            // Skip content inside outer braces
-            continue;
-        } else {
-            plainText += c;
         }
+        content = ss.str();
+        return true;
     }
     
-    content = plainText;
-    return true;
+    // Fallback to simple extraction
+    return RtfHandler::extractPlainText(path, content);
 }
 
 bool FileHandler::saveRTF(const std::string& path, const std::string& content) {
-    // Basic RTF saving - wraps plain text in minimal RTF structure
-    std::ofstream file(path, std::ios::binary);
-    if (!file.is_open()) {
-        return false;
+    // Create RTF document with basic formatting
+    RtfDocument doc;
+    
+    // Split content into paragraphs
+    std::istringstream iss(content);
+    std::string line;
+    while (std::getline(iss, line)) {
+        RtfParagraph para;
+        para.text = line;
+        doc.paragraphs.push_back(para);
     }
     
-    // Minimal RTF header
-    file << "{\\rtf1\\ansi\\deff0\n";
-    file << "{\\fonttbl\n";
-    file << "{\\f0\\fswiss\\fcharset0 Arial;}\n";
-    file << "}\n";
-    
-    // Escape special characters
-    for (char c : content) {
-        if (c == '\\') {
-            file << "\\\\";
-        } else if (c == '{') {
-            file << "\\{";
-        } else if (c == '}') {
-            file << "\\}";
-        } else if (c == '\n') {
-            file << "\\par\n";
-        } else if (static_cast<unsigned char>(c) > 127) {
-            file << "\\'" << std::hex << static_cast<int>(static_cast<unsigned char>(c));
-        } else {
-            file << c;
-        }
-    }
-    
-    file << "\n}";
-    return file.good();
+    RtfHandler handler;
+    return handler.saveToFile(path, doc);
 }
 
 bool FileHandler::loadDOCX(const std::string& path, std::string& content) {
-    // DOCX is a ZIP archive containing XML files
-    // Proper implementation requires:
-    // 1. ZIP extraction library (e.g., minizip, libzip)
-    // 2. XML parser (e.g., pugixml, tinyxml2)
-    // 3. Understanding of Office Open XML structure
+    // Use DocxHandler for full DOCX support
+    DocxHandler handler;
+    DocxDocument doc;
     
-    // Placeholder - returns false to indicate unsupported
-    // For MVP, recommend using plain text or RTF instead
+    if (handler.loadFromFile(path, doc)) {
+        // Extract plain text from all paragraphs
+        std::stringstream ss;
+        for (size_t i = 0; i < doc.paragraphs.size(); ++i) {
+            ss << doc.paragraphs[i].text;
+            if (i < doc.paragraphs.size() - 1) {
+                ss << "\n";
+            }
+        }
+        content = ss.str();
+        return true;
+    }
     
-    return false;
+    // Fallback to simple extraction
+    return DocxHandler::extractPlainText(path, content);
 }
 
 bool FileHandler::saveDOCX(const std::string& path, const std::string& content) {
-    // DOCX creation is complex and requires:
-    // 1. Multiple XML files with specific structure
-    // 2. ZIP packaging
-    // 3. Proper relationships and content types
+    // Create DOCX document with basic formatting
+    DocxDocument doc;
     
-    // Placeholder - returns false to indicate unsupported
-    return false;
+    // Split content into paragraphs
+    std::istringstream iss(content);
+    std::string line;
+    while (std::getline(iss, line)) {
+        DocxParagraph para;
+        para.text = line;
+        doc.paragraphs.push_back(para);
+    }
+    
+    DocxHandler handler;
+    return handler.saveToFile(path, doc);
 }
 
 std::string FileHandler::getFileName(const std::string& path) {

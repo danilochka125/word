@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(LightweightTextEditor VERSION 1.0.0 LANGUAGES CXX)
+project(LightweightTextEditor VERSION 1.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,6 +14,23 @@ option(OPTIMIZE_SIZE "Optimize for binary size" OFF)
 find_package(SDL2 REQUIRED)
 find_package(OpenGL REQUIRED)
 
+# Fetch external dependencies (pugixml for XML/DOCX, minizip for DOCX archives)
+include(FetchContent)
+
+FetchContent_Declare(
+    pugixml
+    GIT_REPOSITORY https://github.com/zeux/pugixml.git
+    GIT_TAG v1.14
+)
+FetchContent_MakeAvailable(pugixml)
+
+FetchContent_Declare(
+    minizip
+    GIT_REPOSITORY https://github.com/nmoinvaz/minizip.git
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(minizip)
+
 # Collect source files
 set(SOURCES
     src/ui/MainWindow.cpp
@@ -23,6 +40,9 @@ set(SOURCES
     src/editor/TextEditor.cpp
     src/editor/VirtualRenderer.cpp
     src/utils/FileHandler.cpp
+    src/formats/DocxHandler.cpp
+    src/formats/RtfHandler.cpp
+    src/fonts/FontManager.cpp
 )
 
 set(HEADERS
@@ -33,6 +53,9 @@ set(HEADERS
     src/ui/MainWindow.h
     src/ui/Toolbar.h
     src/utils/FileHandler.h
+    src/formats/DocxHandler.h
+    src/formats/RtfHandler.h
+    src/fonts/FontManager.h
 )
 
 # Create executable
@@ -43,12 +66,17 @@ target_include_directories(texteditor PRIVATE
     ${SDL2_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
     src/
+    ${pugixml_SOURCE_DIR}/src
+    ${minizip_SOURCE_DIR}
 )
 
 # Link libraries
 target_link_libraries(texteditor PRIVATE
     ${SDL2_LIBRARIES}
     ${OPENGL_LIBRARIES}
+    pugixml::pugixml
+    minizip
+    z
 )
 
 # Platform-specific settings

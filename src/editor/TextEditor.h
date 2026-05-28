@@ -63,15 +63,6 @@ private:
     bool replaceNext(const SearchOptions& options);
     int replaceAll(const SearchOptions& options);
     
-    // Formatting - public for toolbar access
-    void toggleBold();
-    void toggleItalic();
-    void toggleUnderline();
-    void setFontSize(int size);
-    void setFontName(const std::string& name);
-
-public:
-    
     // View control
     void scrollToLine(size_t line);
     void zoomIn();
@@ -88,6 +79,13 @@ public:
     size_t getCurrentLine() const { return m_cursorLine; }
     size_t getCurrentColumn() const { return m_cursorCol; }
     
+    // Formatting - public for toolbar access
+    void toggleBold();
+    void toggleItalic();
+    void toggleUnderline();
+    void setFontSize(int size);
+    void setFontName(const std::string& name);
+
 private:
     Document m_document;
     UndoManager m_undoManager;
